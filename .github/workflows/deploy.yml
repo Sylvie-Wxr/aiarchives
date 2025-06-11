@@ -3,26 +3,31 @@ name: Deploy to EC2
 
 on:
   push:
-    branches: [ xinrui/deepseekmodel ]
+    branches:
+      - xinrui/deepseekmodel
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest 
+    runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Upload to EC2
-      run: |
-        printf "%s" "$EC2_KEY" > deploy_key.pem
-        chmod 600 deploy_key.pem
+      - name: Decode and save EC2 SSH key
+        run: |
+          echo "$EC2_KEY_BASE64" | base64 -d > deploy_key.pem
+          chmod 600 deploy_key.pem
+        env:
+          EC2_KEY_BASE64: ${{ secrets.EC2_KEY_BASE64 }}
 
-        rsync -avz --exclude node_modules --exclude .git \
-          -e "ssh -i deploy_key.pem -o StrictHostKeyChecking=no" \
-          ./ ubuntu@44.237.76.224:/home/ubuntu/app
+      - name: Upload files to EC2
+        run: |
+          rsync -avz --exclude node_modules --exclude .git \
+            -e "ssh -i deploy_key.pem -o StrictHostKeyChecking=no" \
+            ./ ubuntu@44.237.76.224:/home/ubuntu/app
 
-    - name: Restart app
-      run: |
-        ssh -i deploy_key.pem -o StrictHostKeyChecking=no \
-        ubuntu@44.237.76.224 "sudo systemctl restart aiarchives.service"
+      - name: Restart service on EC2
+        run: |
+          ssh -i deploy_key.pem -o StrictHostKeyChecking=no \
+            ubuntu@44.237.76.224 "sudo systemctl restart aiarchives.service"
