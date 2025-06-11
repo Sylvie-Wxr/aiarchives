@@ -15,7 +15,7 @@ jobs:
 
     - name: Upload to EC2
       run: |
-        echo "$EC2_KEY" > deploy_key.pem
+        printf "%s" "$EC2_KEY" > deploy_key.pem
         chmod 600 deploy_key.pem
 
         rsync -avz --exclude node_modules --exclude .git \
