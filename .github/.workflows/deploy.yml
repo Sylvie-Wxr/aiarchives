@@ -1,0 +1,28 @@
+# .github/workflows/deploy.yml
+name: Deploy to EC2
+
+on:
+  push:
+    branches: [ xinrui/deepseekmodel ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest 
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Upload to EC2
+      run: |
+        echo "$EC2_KEY" > deploy_key.pem
+        chmod 600 deploy_key.pem
+
+        rsync -avz --exclude node_modules --exclude .git \
+          -e "ssh -i deploy_key.pem -o StrictHostKeyChecking=no" \
+          ./ ubuntu@44.237.76.224:/home/ubuntu/app
+
+    - name: Restart app
+      run: |
+        ssh -i deploy_key.pem -o StrictHostKeyChecking=no \
+        ubuntu@44.237.76.224 "sudo systemctl restart aiarchives.service"
