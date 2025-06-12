@@ -21,6 +21,20 @@ async function ensureInitialized() {
   }
 }
 
+const ALLOWED_ORIGIN = '*';
+
+export async function OPTIONS() {
+  // Preflight handler
+  return new NextResponse(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
+      'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+    },
+  });
+}
+
 /**
  * POST /api/conversation
  *
@@ -73,7 +87,15 @@ export async function POST(req: NextRequest) {
     // Generate the permalink using the database-generated ID
     const permalink = `${process.env.NEXT_PUBLIC_BASE_URL}/c/${record.id}`;
 
-    return NextResponse.json({ url: permalink }, { status: 201 });
+    return NextResponse.json(
+      { url: permalink },
+      {
+        status: 201,
+        headers: {
+          'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
+        },
+      }
+    );
   } catch (err) {
     console.error('Error processing conversation:', err);
     return NextResponse.json({ error: 'Internal error, see logs' }, { status: 500 });
