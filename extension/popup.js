@@ -41,7 +41,7 @@ chrome.tabs.query({ active: true, currentWindow: true, url: 'https://bard.google
 });
 chrome.tabs.query({ active: true, currentWindow: true, url: 'https://www.meta.ai/*' }, (tabs) => {
   if (tabs?.length) {
-    chrome.tabs.sendMessage(tabs[0].id, { action: 'model', model: 'Meta' }, function (_) {
+    chrome.tabs.sendMessage(tabs[0].id, { action: 'model', model: 'meta' }, function (_) {
       console.log('is Meta');
     });
   }
