@@ -53,5 +53,12 @@ chrome.tabs.query({ active: true, currentWindow: true, url: 'https://claude.ai/*
     });
   }
 });
+chrome.tabs.query({ active: true, currentWindow: true, url: 'https://chat.deepseek.com/*' }, (tabs) => {
+  if (tabs?.length) {
+    chrome.tabs.sendMessage(tabs[0].id, { action: 'model', model: 'deepSeek' }, function (_) {
+      console.log('is DeepSeek');
+    });
+  }
+});
 
 window.onload = initApp;
