@@ -1,5 +1,6 @@
 import type { Conversation } from '@/types/conversation';
 import * as cheerio from 'cheerio';
+import type { Element } from 'domhandler';
 
 type Message = {
   role: "user" | "assistant";
@@ -31,12 +32,12 @@ export async function parseDeepSeek(html: string): Promise<Conversation> {
     const codeParts: string[] = [];
 
     const answerBlock = $(answers[i]);
-    answerBlock.find("p.ds-markdown-paragraph").each((_: number, p: any) => {
+    answerBlock.find("p.ds-markdown-paragraph").each((_: number, p: Element) => {
       const para = $(p).text().replace(/\s+/g, " ").trim();
       if (para) textParts.push(para);
     });
 
-    answerBlock.find("div.md-code-block pre").each((_: number, pre: any) => {
+    answerBlock.find("div.md-code-block pre").each((_: number, pre: Element) => {
       const code = $(pre).text().trimEnd();
       if (code) codeParts.push(code);
     });
