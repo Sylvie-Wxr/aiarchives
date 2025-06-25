@@ -3,7 +3,7 @@ import * as cheerio from 'cheerio';
 import type { Element } from 'domhandler';
 
 type Message = {
-  role: "user" | "assistant";
+  role: "Question" | "Answer";
   content: string;
   code?: string;
 };
@@ -25,7 +25,7 @@ export async function parseDeepSeek(html: string): Promise<Conversation> {
   for (let i = 0; i < totalPairs; i++) {
     const questionText = $(questions[i]).text().replace(/\s+/g, " ").trim();
     if (questionText) {
-      messages.push({ role: "user", content: questionText });
+      messages.push({ role: "Question", content: questionText });
     }
 
     const textParts: string[] = [];
@@ -43,7 +43,7 @@ export async function parseDeepSeek(html: string): Promise<Conversation> {
     });
 
     messages.push({
-      role: "assistant",
+      role: "Answer",
       content: textParts.join("\n"),
       code: codeParts.length ? codeParts.join("\n---\n") : undefined,
     });
@@ -51,21 +51,6 @@ export async function parseDeepSeek(html: string): Promise<Conversation> {
 
   // Format messages as HTML for display
   const htmlContent = formatAsDisplayableHtml(messages);
-
-    // Debug logs
-  console.log('[parseDeepSeek] Q count:', questions.length, 'A count:', answers.length);
-  console.log('[parseDeepSeek] Messages count:', messages.length);
-  console.log('[parseDeepSeek] Sample output:', htmlContent.slice(0, 300));
-
-  // Fallback if nothing was parsed
-  if (messages.length === 0) {
-    return {
-      model: 'deepseek',
-      content: `<html><body><h1>⚠️ No Q&A extracted from DeepSeek page</h1><pre>${html.slice(0, 1000)}</pre></body></html>`,
-      scrapedAt: new Date().toISOString(),
-      sourceHtmlBytes: html.length,
-    };
-  }
 
   return {
     model: 'deepSeek',
@@ -85,8 +70,8 @@ function formatAsDisplayableHtml(messages: Message[]): string {
   <style>
     body { font-family: Arial, sans-serif; padding: 2em; line-height: 1.6; background: #f9f9f9; }
     .message { margin-bottom: 2em; }
-    .user { color: #0b5394; font-weight: bold; }
-    .assistant { color: #38761d; font-weight: bold; }
+    .Question { color: #0b5394; font-weight: bold; }
+    .Answer { color: #38761d; font-weight: bold; }
     pre { background: #eee; padding: 1em; border-radius: 5px; overflow-x: auto; }
   </style>
 </head>
