@@ -52,8 +52,23 @@ export async function parseDeepSeek(html: string): Promise<Conversation> {
   // Format messages as HTML for display
   const htmlContent = formatAsDisplayableHtml(messages);
 
+    // Debug logs
+  console.log('[parseDeepSeek] Q count:', questions.length, 'A count:', answers.length);
+  console.log('[parseDeepSeek] Messages count:', messages.length);
+  console.log('[parseDeepSeek] Sample output:', htmlContent.slice(0, 300));
+
+  // Fallback if nothing was parsed
+  if (messages.length === 0) {
+    return {
+      model: 'deepseek',
+      content: `<html><body><h1>⚠️ No Q&A extracted from DeepSeek page</h1><pre>${html.slice(0, 1000)}</pre></body></html>`,
+      scrapedAt: new Date().toISOString(),
+      sourceHtmlBytes: html.length,
+    };
+  }
+
   return {
-    model: 'DeepSeek',
+    model: 'deepSeek',
     content: htmlContent,
     scrapedAt: new Date().toISOString(),
     sourceHtmlBytes: html.length,
