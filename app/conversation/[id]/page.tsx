@@ -22,7 +22,9 @@ interface ConversationDetailData {
  */
 async function fetchConversationDetail(id: string): Promise<ConversationDetailData> {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+    const baseUrl = typeof window === 'undefined' 
+      ? 'http://localhost:3000'  // Server-side
+      : (process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000');
     const response = await fetch(`${baseUrl}/api/conversation/${id}`, {
       method: 'GET',
       headers: {

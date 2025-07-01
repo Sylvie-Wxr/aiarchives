@@ -20,13 +20,19 @@ export async function parseDeepSeek(html: string): Promise<Conversation> {
   styleTag.textContent = css;
   document.head.appendChild(styleTag);
 
-  // 2. Grab main conversation container
+  // 2. Clean up icons and extra UI elements
+  const iconSelectors = ['.ds-icon-button'];
+  iconSelectors.forEach(selector => {
+    document.querySelectorAll(selector).forEach(el => el.remove());
+  });
+
+  // 3. Grab main conversation container
   const chatContainer = document.querySelector('div.dad65929');
   if (!chatContainer) {
     throw new Error('Conversation container not found');
   }
 
-  // 3. Prepare the final HTML output
+  // 4. Prepare the final HTML output
   const htmlContent = `
     <html>
       <head>${document.head.innerHTML}</head>
