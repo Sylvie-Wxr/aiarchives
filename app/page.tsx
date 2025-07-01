@@ -27,7 +27,9 @@ interface ConversationCardData {
  */
 async function fetchConversations(): Promise<ConversationRecord[]> {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+    const baseUrl = typeof window === 'undefined' 
+      ? 'http://localhost:3000'  // Server-side
+      : (process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'); 
     const response = await fetch(`${baseUrl}/api/conversation?limit=50`, {
       method: 'GET',
       headers: {
