@@ -13,7 +13,7 @@ export async function parseDeepSeek(html: string): Promise<Conversation> {
   const document = dom.window.document;
 
   // 1. Inject <style> from deepseek.css
-  const cssPath = path.resolve(__dirname, 'deepseek.css');
+  const cssPath = path.resolve(process.cwd(), 'lib/parsers/assets/deepseek.css');
   const css = fs.readFileSync(cssPath, 'utf-8');
 
   const styleTag = document.createElement('style');
