@@ -9,6 +9,10 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      SSH_KEY: ${{ secrets.EC2_KEY_BASE64 }}
+      HOST: ${{ secrets.SERVER_HOST }}
+      USER: ${{ secrets.SERVER_USER }}
 
     steps:
       - name: Checkout code
@@ -16,23 +20,22 @@ jobs:
 
       - name: Decode and save EC2 SSH key
         run: |
-          echo "$EC2_KEY_BASE64" | base64 -d > deploy_key.pem
-          chmod 600 deploy_key.pem
-        env:
-          EC2_KEY_BASE64: ${{ secrets.EC2_KEY_BASE64 }}
-
-      - name: Upload files to EC2
+          echo "$SSH_KEY" | base64 -d > deploy_key
+          chmod 600 deploy_key
+      
+      - name: Build
         run: |
-          rsync -avz --exclude node_modules --exclude .git \
-            -e "ssh -i deploy_key.pem -o StrictHostKeyChecking=no" \
-            ./ ubuntu@44.237.76.224:/home/ubuntu/app
+          npm ci
+          npm run build
 
-      - name: Install dependencies and build on EC2
+      - name: Sync build to EC2
         run: |
-          ssh -i deploy_key.pem -o StrictHostKeyChecking=no \
-            ubuntu@44.237.76.224 "cd /home/ubuntu/app && set -a && source /etc/app.env && npm ci && npm run build"
+          rsync -avz --delete \
+            --exclude 'node_modules' --exclude '.git' --exclude '.env' \
+            -e "ssh -i deploy_key -o StrictHostKeyChecking=no" \
+            . $USER@$HOST:~/app
 
-      - name: Restart service on EC2
+      - name: Restart AI Archives service
         run: |
-          ssh -i deploy_key.pem -o StrictHostKeyChecking=no \
-            ubuntu@44.237.76.224 "sudo systemctl restart aiarchives.service"
+          ssh -i deploy_key -o StrictHostKeyChecking=no $USER@$HOST \
+            "sudo systemctl restart aiarchives"
