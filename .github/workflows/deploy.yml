@@ -30,7 +30,7 @@ jobs:
       - name: Install dependencies and build on EC2
         run: |
           ssh -i deploy_key.pem -o StrictHostKeyChecking=no \
-            ubuntu@44.237.76.224 "cd /home/ubuntu/app && npm ci && npm run build"
+            ubuntu@44.237.76.224 "cd /home/ubuntu/app && set -a && source /etc/app.env && npm ci && npm run build"
 
       - name: Restart service on EC2
         run: |
