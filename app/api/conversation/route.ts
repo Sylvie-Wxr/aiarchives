@@ -72,9 +72,21 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: '`htmlDoc` must be a file field' }, { status: 400 });
     }
 
-    // Parse the conversation from HTML
+    // Parse the conversation from HTML if not skipScraping, otherwise skip parsing
+    const skipScraping = formData.has('skipScraping');
+    let conversation;
     const html = await file.text();
-    const conversation = await parseHtmlToConversation(html, model);
+    if (!skipScraping) {
+      conversation = await parseHtmlToConversation(html, model);
+    } else {
+      conversation = {
+        model: model,
+        content: html,
+        scrapedAt: new Date().toISOString(),
+        sourceHtmlBytes: html.length,
+      };
+    }
+
     console.log('conversation =>', conversation.model, conversation.content);
 
     // Generate a unique ID for the conversation
